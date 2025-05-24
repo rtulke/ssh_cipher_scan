@@ -261,9 +261,9 @@ python3 sshscan.py --file hosts.txt --threads 5 --timeout 30
 +------------------+------+---------+----------+-----------+----------------------------+--------+
 | Host             | Port | Status  | Security | Compliance| Banner                     | Time(s)|
 +------------------+------+---------+----------+-----------+----------------------------+--------+
-| prod-web1.com    | 22   | success | 95/100   | ✓ PASS    | SSH-2.0-OpenSSH_9.3p1     | 1.2    |
-| legacy-db.com    | 22   | success | 35/100   | ✗ FAIL    | SSH-2.0-OpenSSH_6.6.1     | 2.8    |
-| secure-api.com   | 2222 | success | 88/100   | ✓ PASS    | SSH-2.0-OpenSSH_8.9p1     | 1.5    |
+| prod-web1.com    | 22   | success | 95/100   | ✓ PASS    | SSH-2.0-OpenSSH_9.3p1      | 1.2    |
+| legacy-db.com    | 22   | success | 35/100   | ✗ FAIL    | SSH-2.0-OpenSSH_6.6.1      | 2.8    |
+| secure-api.com   | 2222 | success | 88/100   | ✓ PASS    | SSH-2.0-OpenSSH_8.9p1      | 1.5    |
 +------------------+------+---------+----------+-----------+----------------------------+--------+
 ```
 
