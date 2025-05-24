@@ -26,9 +26,13 @@ A comprehensive Tool for enterprise SSH security auditing with advanced features
 ```bash
 # Install dependencies
 sudo apt update && apt upgrade -y
-sudo apt install python3-toml python3-yaml -y
+sudo apt install python3-toml python3-yaml git -y
+
+# Clone Repository from GitHub
+git clone https://github.com/rtulke/ssh_cipher_scan.git
 
 # Make executable
+cd ssh_cipher_scan
 chmod +x ssh_algorithm_scanner.py
 
 # Create configuration directory
@@ -54,17 +58,21 @@ mkdir -p ~/.ssh-scanner
 mkdir ~/development
 cd ~/development
 
-git 
+# Clone Repository from GitHub
+git clone https://github.com/rtulke/ssh_cipher_scan.git 
+cd ssh_cipher_scan
 
 # Create virtual environment
-
-
-# setup python environment
 python3 -m venv .venv
 source .venv/bin/activate
 
 # Install all dependencies
 pip install -r requirements.txt
+
+
+# Start Script
+chmod +x ssh_cipher_scan.py
+python3 ./ssh_cipher_scan.py --help
 ```
 
 
