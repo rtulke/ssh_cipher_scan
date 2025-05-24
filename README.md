@@ -13,6 +13,7 @@ A comprehensive Tool for enterprise SSH security auditing with advanced features
 - **Security Scoring**: Advanced algorithm strength analysis (0-100 scale)
 - **Risk Assessment**: Context-aware vulnerability prioritization
 - **Audit-Ready Reports**: Professional compliance documentation
+- **NSA Backdoor Detection**: Detects SSH algorithms with potential NSA backdoors.
 
 ### Configuration Management  
 - **TOML Configuration**: Enterprise-grade configuration file support
