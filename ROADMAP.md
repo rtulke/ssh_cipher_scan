@@ -2,7 +2,7 @@
 
 ## Planned Features for Future Releases
 
-### Version 2.1 (Q2 2025)
+### Version 2.1
 - **Enhanced Logging**
   - File-based logging with rotation
   - Syslog integration
@@ -12,8 +12,9 @@
   - HTML report generation with charts
   - Markdown reports for documentation
   - Executive summary templates
+  - E-Mail integration
 
-### Version 2.2 (Q3 2025)
+### Version 2.2
 - **Performance Optimizations**
   - Connection pooling for repeated scans
   - Algorithm result caching
@@ -24,7 +25,7 @@
   - Custom compliance rules
   - Environment-specific profiles
 
-### Version 3.0 (Q4 2025)
+### Version 3.0 Maybe ;)
 - **Enterprise Features**
   - REST API for integration
   - Real-time alerting system
@@ -42,14 +43,14 @@
   - Prometheus endpoint
   - Splunk forwarder
   - SIEM integration
-
-## Community Features
-- Windows support improvements
-- Docker container
-- Ansible playbook integration
-- Kubernetes operator
-- Web UI dashboard
-- Scheduled scanning
-- Diff reports between scans
-- Custom algorithm definitions
-- Plugin system
+    
+- ** Web Based UI Dashboard
+  - Web UI dashboard
+  - Scheduled scanning
+  - Diff reports between scans
+  - Custom algorithm definitions
+  - Plugin system
+  
+- ** Automation Features**
+  - Docker container
+  - Ansible playbook integration
