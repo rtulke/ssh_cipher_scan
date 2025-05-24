@@ -29,14 +29,14 @@ sudo apt update && apt upgrade -y
 sudo apt install python3-toml python3-yaml git -y
 
 # Clone Repository from GitHub
-git clone https://github.com/rtulke/ssh_cipher_scan.git
+git clone https://github.com/rtulke/sshscan.git
 
 # Make executable
-cd ssh_cipher_scan
-chmod +x ssh_algorithm_scanner.py
+cd sshscan
+chmod +x sshscan.py
 
 # Create configuration directory
-mkdir -p ~/.ssh-scanner
+mkdir -p ~/.sshscan
 ```
 
 
@@ -46,10 +46,10 @@ mkdir -p ~/.ssh-scanner
 pip install PyYAML toml
 
 # Make executable
-chmod +x ssh_algorithm_scanner.py
+chmod +x sshscan.py
 
 # Create configuration directory
-mkdir -p ~/.ssh-scanner
+mkdir -p ~/.sshscan
 ```
 
 ### Developer Installation
@@ -59,8 +59,8 @@ mkdir ~/development
 cd ~/development
 
 # Clone Repository from GitHub
-git clone https://github.com/rtulke/ssh_cipher_scan.git 
-cd ssh_cipher_scan
+git clone https://github.com/rtulke/sshscan.git 
+cd sshscan
 
 # Create virtual environment
 python3 -m venv .venv
@@ -69,35 +69,34 @@ source .venv/bin/activate
 # Install all dependencies
 pip install -r requirements.txt
 
-
 # Start Script
-chmod +x ssh_cipher_scan.py
-python3 ./ssh_cipher_scan.py --help
+chmod +x sshscan.py
+python3 ./sshscan.py --help
 ```
 
 
 ### Enterprise Installation
 ```bash
 # Create virtual environment
-python3 -m venv /opt/ssh-scanner-env
-source /opt/ssh-scanner-env/bin/activate
+python3 -m venv /opt/sshscan-env
+source /opt/sshscan-env/bin/activate
 
 # Install all dependencies
 pip install -r requirements.txt
 
 # Set up system-wide configuration
-sudo mkdir -p /etc/ssh-scanner
-sudo cp ssh_scanner_config.toml /etc/ssh-scanner/
+sudo mkdir -p /etc/sshscan
+sudo cp ssh_scanner_config.toml /etc/sshscan/
 
 # Create systemd service (optional)
-sudo cp ssh-scanner.service /etc/systemd/system/
+sudo cp sshscan.service /etc/systemd/system/
 ```
 
 ## 🔧 Configuration Examples
 
 ### TOML Configuration File
 ```toml
-# ssh_scanner_config.toml
+# sshscan_config.toml
 [scanner]
 threads = 50
 timeout = 15
@@ -121,10 +120,10 @@ include_compliance = true
 ### Command Line with Configuration
 ```bash
 # Use configuration file
-python3 ssh_algorithm_scanner.py --config production.toml --file servers.txt
+python3 sshscan.py --config production.toml --file servers.txt
 
 # Override specific settings
-python3 ssh_algorithm_scanner.py --config base.toml --threads 100 --compliance FIPS_140_2
+python3 sshscan.py --config base.toml --threads 100 --compliance FIPS_140_2
 ```
 
 ## 📊 Compliance Framework Support
@@ -132,7 +131,7 @@ python3 ssh_algorithm_scanner.py --config base.toml --threads 100 --compliance F
 ### Available Frameworks
 ```bash
 # List all supported frameworks
-python3 ssh_algorithm_scanner.py --list-frameworks
+python3 sshscan.py --list-frameworks
 
 Available Compliance Frameworks:
   NIST: NIST Cybersecurity Framework
@@ -144,13 +143,13 @@ Available Compliance Frameworks:
 ### Framework-Specific Scanning
 ```bash
 # NIST compliance check
-python3 ssh_algorithm_scanner.py --host "server1.com,server2.com" --compliance NIST
+python3 sshscan.py --host "server1.com,server2.com" --compliance NIST
 
 # FIPS 140-2 compliance (strict)
-python3 ssh_algorithm_scanner.py --file federal_servers.txt --compliance FIPS_140_2
+python3 sshscan.py --file federal_servers.txt --compliance FIPS_140_2
 
 # BSI TR-02102 (German standard)
-python3 ssh_algorithm_scanner.py --file eu_servers.yaml --compliance BSI_TR_02102 --format json
+python3 sshscan.py --file eu_servers.yaml --compliance BSI_TR_02102 --format json
 ```
 
 ## ⚡ Performance Features
@@ -158,10 +157,10 @@ python3 ssh_algorithm_scanner.py --file eu_servers.yaml --compliance BSI_TR_0210
 ### SSH Multiplexing
 ```bash
 # High-performance scanning with multiplexing (default: enabled)
-python3 ssh_algorithm_scanner.py --file large_network.txt --threads 50
+python3 sshscan.py --file large_network.txt --threads 50
 
 # Disable multiplexing if needed
-python3 ssh_algorithm_scanner.py --host example.com --no-multiplex
+python3 sshscan.py --host example.com --no-multiplex
 
 # Performance comparison:
 # Without multiplexing: 50 algorithms × 1000 hosts = 13+ hours
@@ -171,10 +170,10 @@ python3 ssh_algorithm_scanner.py --host example.com --no-multiplex
 ### DNS Caching & Retry Logic
 ```bash
 # Enhanced reliability with retry logic
-python3 ssh_algorithm_scanner.py --file unreliable_hosts.txt --retry-attempts 5
+python3 sshscan.py --file unreliable_hosts.txt --retry-attempts 5
 
 # Show performance statistics
-python3 ssh_algorithm_scanner.py --file hosts.txt --stats
+python3 sshscan.py --file hosts.txt --stats
 
 Performance Statistics:
 dns_cache:
@@ -226,33 +225,33 @@ another-server.com:2222
 ### Batch Scanning Commands
 ```bash
 # Scan from JSON file
-python3 ssh_cipher_scanner.py --file hosts.json --format table
+python3 sshscan.py --file hosts.json --format table
 
 # Scan from CSV with custom threading
-python3 ssh_cipher_scanner.py --file hosts.csv --threads 50 --format csv
+python3 sshscan.py --file hosts.csv --threads 50 --format csv
 
 # Export YAML results
-python3 ssh_cipher_scanner.py --file hosts.yaml --format yaml --output scan_results.yaml
+python3 sshscan.py --file hosts.yaml --format yaml --output scan_results.yaml
 ```
 
 ### Explicit Algorithm Testing
 ```bash
 # Test specific ciphers only
-python3 ssh_cipher_scanner.py --host "server1.com,server2.com" \
+python3 sshscan.py --host "server1.com,server2.com" \
   --explicit "aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr"
 
 # Test weak algorithms
-python3 ssh_cipher_scanner.py --file hosts.txt \
+python3 sshscan.py --file hosts.txt \
   --explicit "3des-cbc,des,arcfour,hmac-md5" --format table
 ```
 
 ### Performance Tuning
 ```bash
 # High-performance scan (100 concurrent threads)
-python3 ssh_cipher_scanner.py --file large_hostlist.txt --threads 100 --timeout 5
+python3 sshscan.py --file large_hostlist.txt --threads 100 --timeout 5
 
 # Conservative scan (5 threads, longer timeout)
-python3 ssh_cipher_scanner.py --file hosts.txt --threads 5 --timeout 30
+python3 sshscan.py --file hosts.txt --threads 5 --timeout 30
 ```
 
 ## 📊 Enhanced Output Examples
@@ -359,7 +358,7 @@ The scanner automatically evaluates algorithm strength:
 ## 🔧 Complete Command Line Reference
 
 ```
-python3 ssh_algorithm_scanner.py [OPTIONS]
+python3 sshscan.py [OPTIONS]
 
 Configuration:
   --config, -c FILE             TOML configuration file
@@ -395,7 +394,7 @@ Output & Reporting:
 #### Enterprise Compliance Auditing
 ```bash
 # NIST compliance audit for production infrastructure
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --config production.toml \
   --file /etc/ssh-scanner/prod_hosts.yaml \
   --compliance NIST \
@@ -404,7 +403,7 @@ python3 ssh_algorithm_scanner.py \
   --stats
 
 # FIPS 140-2 compliance for federal systems
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --file federal_systems.txt \
   --compliance FIPS_140_2 \
   --threads 100 \
@@ -415,7 +414,7 @@ python3 ssh_algorithm_scanner.py \
 #### High-Performance Network Scanning
 ```bash
 # Large-scale network assessment (10,000+ hosts)
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --config high_performance.toml \
   --file large_network.txt \
   --threads 200 \
@@ -425,7 +424,7 @@ python3 ssh_algorithm_scanner.py \
   --output network_scan_results.csv
 
 # Quick vulnerability assessment (specific weak algorithms)
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --host "192.168.1.0/24" \
   --explicit "des,3des-cbc,arcfour,hmac-md5,ssh-dss" \
   --threads 50 \
@@ -435,13 +434,13 @@ python3 ssh_algorithm_scanner.py \
 #### Targeted Security Testing
 ```bash
 # Test specific servers for modern algorithm support
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --host "web1.example.com:22,db1.example.com:3306,api.example.com:2222" \
   --explicit "aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,ssh-ed25519" \
   --verbose
 
 # Compliance validation with custom configuration
-python3 ssh_algorithm_scanner.py \
+python3 sshscan.py \
   --config custom_security_policy.toml \
   --file critical_servers.json \
   --compliance BSI_TR_02102 \
@@ -471,23 +470,23 @@ python3 ssh_algorithm_scanner.py \
 ### Security Auditing
 ```bash
 # Enterprise SSH audit
-python3 ssh_cipher_scanner.py --file corporate_servers.json --format json --output audit_results.json
+python3 sshscan.py --file corporate_servers.json --format json --output audit_results.json
 
 # Compliance checking
-python3 ssh_cipher_scanner.py --file prod_servers.txt --explicit "aes256-gcm@openssh.com,chacha20-poly1305@openssh.com"
+python3 sshscan.py --file prod_servers.txt --explicit "aes256-gcm@openssh.com,chacha20-poly1305@openssh.com"
 ```
 
 ### Network Discovery
 ```bash
 # Subnet scanning (with nmap integration)
 nmap -p 22 --open 192.168.1.0/24 | grep -E "^Nmap scan report" | awk '{print $5}' > discovered_ssh.txt
-python3 ssh_cipher_scanner.py --file discovered_ssh.txt
+python3 sshscan.py --file discovered_ssh.txt
 ```
 
 ### Vulnerability Assessment
 ```bash
 # Test for specific vulnerabilities
-python3 ssh_cipher_scanner.py --file targets.txt --explicit "3des-cbc,des,arcfour,hmac-md5" --format csv
+python3 sshscan.py --file targets.txt --explicit "3des-cbc,des,arcfour,hmac-md5" --format csv
 ```
 
 ## 🤝 Contributing
@@ -534,14 +533,14 @@ python3 ssh_cipher_scanner.py --file targets.txt --explicit "3des-cbc,des,arcfou
 ### Performance Optimization
 ```bash
 # Monitor DNS cache efficiency
-python3 ssh_algorithm_scanner.py --file hosts.txt --stats --verbose
+python3 sshscan.py --file hosts.txt --stats --verbose
 
 # Optimal thread count calculation
 # CPU cores × 10-20 for I/O bound operations
-python3 ssh_algorithm_scanner.py --threads $(($(nproc) * 15)) --file hosts.txt
+python3 sshscan.py --threads $(($(nproc) * 15)) --file hosts.txt
 
 # Memory usage optimization for large scans
-python3 ssh_algorithm_scanner.py --file huge_hostlist.txt --threads 50 --timeout 3
+python3 sshscan.py --file huge_hostlist.txt --threads 50 --timeout 3
 ```
 
 ### Common Issues & Solutions
@@ -549,7 +548,7 @@ python3 ssh_algorithm_scanner.py --file huge_hostlist.txt --threads 50 --timeout
 **"SSH multiplexing failed"**
 ```bash
 # Disable multiplexing for problematic hosts
-python3 ssh_algorithm_scanner.py --host problematic.com --no-multiplex
+python3 sshscan.py --host problematic.com --no-multiplex
 
 # Check SSH client version (requires OpenSSH 4.0+)
 ssh -V
@@ -558,7 +557,7 @@ ssh -V
 **"Too many DNS failures"**
 ```bash
 # Increase DNS cache TTL
-python3 ssh_algorithm_scanner.py --config extended_cache.toml --file hosts.txt
+python3 sshscan.py --config extended_cache.toml --file hosts.txt
 
 # Use IP addresses instead of hostnames where possible
 # Convert domains to IPs: dig +short hostname >> ip_list.txt
@@ -567,22 +566,22 @@ python3 ssh_algorithm_scanner.py --config extended_cache.toml --file hosts.txt
 **"High memory usage"**
 ```bash
 # Reduce thread count for memory-constrained systems
-python3 ssh_algorithm_scanner.py --threads 10 --file hosts.txt
+python3 sshscan.py --threads 10 --file hosts.txt
 
 # Use streaming for large result sets
-python3 ssh_algorithm_scanner.py --file hosts.txt --format csv --output results.csv
+python3 sshscan.py --file hosts.txt --format csv --output results.csv
 ```
 
 **"Compliance check failures"**
 ```bash
 # Verify framework requirements
-python3 ssh_algorithm_scanner.py --list-frameworks
+python3 sshscan.py --list-frameworks
 
 # Test against specific framework
-python3 ssh_algorithm_scanner.py --host test.com --compliance NIST --verbose
+python3 sshscan.py --host test.com --compliance NIST --verbose
 
 # Debug compliance logic
-python3 ssh_algorithm_scanner.py --host test.com --local --verbose | grep -E "(cipher|mac|kex|key)"
+python3 sshscan.py --host test.com --local --verbose | grep -E "(cipher|mac|kex|key)"
 ```
 
 ### Configuration Validation
@@ -591,10 +590,10 @@ python3 ssh_algorithm_scanner.py --host test.com --local --verbose | grep -E "(c
 python3 -c "import toml; print(toml.load('config.toml'))"
 
 # Test configuration without scanning
-python3 ssh_algorithm_scanner.py --config test.toml --local
+python3 sshscan.py --config test.toml --local
 
 # Override configuration for testing
-python3 ssh_algorithm_scanner.py --config prod.toml --threads 5 --timeout 30 --verbose
+python3 sshscan.py --config prod.toml --threads 5 --timeout 30 --verbose
 ```
 
 ## 📄 License
