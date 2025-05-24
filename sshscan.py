@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-SSH Algorithm Security Scanner - Enhanced Professional Version
-Features: SSH-Multiplexing, Compliance Frameworks, TOML Config, Retry Logic, DNS Caching
+SSH Algorithm Security Scanner - Professional Enterprise Edition
+Features: SSH-Multiplexing, Compliance Frameworks, NSA Backdoor Detection, TOML Config, Retry Logic, DNS Caching
+Version: 2.0.0
 """
 
 import subprocess
@@ -46,6 +47,7 @@ class SSHHostResult:
     status: str = "unknown"  # success, failed, timeout
     security_score: int = 0
     compliance_status: Dict[str, bool] = field(default_factory=dict)
+    nsa_backdoor_analysis: Dict[str, any] = field(default_factory=dict)
     algorithms: Dict[str, List[SSHAlgorithmInfo]] = field(default_factory=dict)
     scan_time: float = 0.0
     ssh_banner: str = ""
@@ -139,10 +141,219 @@ def retry_on_failure(max_attempts: int = 3, backoff_factor: float = 2.0, excepti
     return decorator
 
 
+class NSABackdoorDetector:
+    """Detection of algorithms with suspected NSA backdoors"""
+    
+    # Algorithms with suspected NSA involvement/backdoors
+    SUSPECTED_NSA_ALGORITHMS = {
+        'kex': {
+            'ecdh-sha2-nistp256': {
+                'risk': 'HIGH',
+                'reason': 'NIST P-256 curve - NSA involvement in curve selection',
+                'alternative': 'curve25519-sha256',
+                'reference': 'Snowden revelations, SafeCurves project'
+            },
+            'ecdh-sha2-nistp384': {
+                'risk': 'HIGH', 
+                'reason': 'NIST P-384 curve - NSA involvement in curve selection',
+                'alternative': 'curve25519-sha256',
+                'reference': 'Snowden revelations, SafeCurves project'
+            },
+            'ecdh-sha2-nistp521': {
+                'risk': 'HIGH',
+                'reason': 'NIST P-521 curve - NSA involvement in curve selection', 
+                'alternative': 'curve25519-sha256',
+                'reference': 'Snowden revelations, SafeCurves project'
+            }
+        },
+        'key': {
+            'ecdsa-sha2-nistp256': {
+                'risk': 'HIGH',
+                'reason': 'ECDSA with NIST P-256 - potential NSA backdoor in curve',
+                'alternative': 'ssh-ed25519',
+                'reference': 'NSA Suite B cryptography concerns'
+            },
+            'ecdsa-sha2-nistp384': {
+                'risk': 'HIGH',
+                'reason': 'ECDSA with NIST P-384 - potential NSA backdoor in curve',
+                'alternative': 'ssh-ed25519', 
+                'reference': 'NSA Suite B cryptography concerns'
+            },
+            'ecdsa-sha2-nistp521': {
+                'risk': 'HIGH',
+                'reason': 'ECDSA with NIST P-521 - potential NSA backdoor in curve',
+                'alternative': 'ssh-ed25519',
+                'reference': 'NSA Suite B cryptography concerns' 
+            }
+        },
+        'cipher': {
+            # Historical NSA involvement
+            'des': {
+                'risk': 'CRITICAL',
+                'reason': 'NSA involvement in S-box design, weak key size',
+                'alternative': 'aes256-gcm@openssh.com',
+                'reference': 'Historical NSA involvement in DES design'
+            }
+        },
+        'mac': {
+            # Potential concerns with certain implementations
+            'hmac-sha1': {
+                'risk': 'MEDIUM',
+                'reason': 'SHA-1 developed with NSA involvement, collision attacks',
+                'alternative': 'hmac-sha2-256-etm@openssh.com',
+                'reference': 'SHA-1 cryptanalysis and NSA design'
+            }
+        }
+    }
+    
+    # Known compromised/backdoored algorithms
+    CONFIRMED_BACKDOORS = {
+        'dual_ec_drbg': {
+            'risk': 'CRITICAL',
+            'reason': 'Confirmed NSA backdoor in random number generator',
+            'status': 'CONFIRMED_BACKDOOR',
+            'reference': 'NIST SP 800-90A, Snowden documents'
+        }
+    }
+    
+    @classmethod
+    def check_nsa_backdoor_risk(cls, algorithms: Dict[str, List[SSHAlgorithmInfo]]) -> Dict:
+        """Check for algorithms with suspected NSA backdoors"""
+        backdoor_analysis = {
+            'high_risk_algorithms': [],
+            'medium_risk_algorithms': [],
+            'confirmed_backdoors': [],
+            'recommendations': [],
+            'overall_risk_score': 0,
+            'trusted_alternatives': []
+        }
+        
+        total_algorithms = 0
+        risky_algorithms = 0
+        
+        for algo_type, algo_list in algorithms.items():
+            for algo in algo_list:
+                if algo.supported:
+                    total_algorithms += 1
+                    
+                    # Check for suspected backdoors
+                    if algo_type in cls.SUSPECTED_NSA_ALGORITHMS:
+                        if algo.name in cls.SUSPECTED_NSA_ALGORITHMS[algo_type]:
+                            risky_algorithms += 1
+                            risk_info = cls.SUSPECTED_NSA_ALGORITHMS[algo_type][algo.name]
+                            
+                            risk_entry = {
+                                'algorithm': algo.name,
+                                'type': algo_type,
+                                'risk_level': risk_info['risk'],
+                                'reason': risk_info['reason'],
+                                'recommended_alternative': risk_info['alternative'],
+                                'reference': risk_info['reference']
+                            }
+                            
+                            if risk_info['risk'] == 'HIGH' or risk_info['risk'] == 'CRITICAL':
+                                backdoor_analysis['high_risk_algorithms'].append(risk_entry)
+                            else:
+                                backdoor_analysis['medium_risk_algorithms'].append(risk_entry)
+        
+        # Calculate overall risk score
+        if total_algorithms > 0:
+            risk_percentage = (risky_algorithms / total_algorithms) * 100
+            backdoor_analysis['overall_risk_score'] = min(100, risk_percentage * 2)  # Amplify risk
+        
+        # Generate recommendations
+        if backdoor_analysis['high_risk_algorithms']:
+            backdoor_analysis['recommendations'].extend([
+                'CRITICAL: Replace NIST P-curve algorithms with Curve25519/Ed25519',
+                'Avoid ECDH/ECDSA with NIST curves (P-256, P-384, P-521)',
+                'Use independently developed cryptographic primitives',
+                'Consider SafeCurves.cr.yp.to recommendations'
+            ])
+        
+        # Trusted alternatives
+        backdoor_analysis['trusted_alternatives'] = [
+            'curve25519-sha256 (Key Exchange)',
+            'ssh-ed25519 (Host Keys)', 
+            'aes256-gcm@openssh.com (Encryption)',
+            'chacha20-poly1305@openssh.com (Encryption)',
+            'hmac-sha2-256-etm@openssh.com (MAC)'
+        ]
+        
+        return backdoor_analysis
+    
+    @classmethod
+    def get_algorithm_trustworthiness(cls, algorithm: str, algo_type: str) -> Dict:
+        """Get detailed trustworthiness assessment for specific algorithm"""
+        if algo_type in cls.SUSPECTED_NSA_ALGORITHMS and algorithm in cls.SUSPECTED_NSA_ALGORITHMS[algo_type]:
+            return {
+                'trusted': False,
+                'risk_level': cls.SUSPECTED_NSA_ALGORITHMS[algo_type][algorithm]['risk'],
+                'concerns': cls.SUSPECTED_NSA_ALGORITHMS[algo_type][algorithm]['reason'],
+                'alternative': cls.SUSPECTED_NSA_ALGORITHMS[algo_type][algorithm]['alternative']
+            }
+        
+        # Safe algorithms (independently developed)
+        safe_algorithms = {
+            'curve25519-sha256', 'curve25519-sha256@libssh.org',
+            'ssh-ed25519', 'chacha20-poly1305@openssh.com',
+            'aes256-gcm@openssh.com', 'aes128-gcm@openssh.com'
+        }
+        
+        if algorithm in safe_algorithms:
+            return {
+                'trusted': True,
+                'risk_level': 'LOW',
+                'concerns': 'None - independently developed',
+                'alternative': None
+            }
+        
+        return {
+            'trusted': None,  # Unknown
+            'risk_level': 'UNKNOWN',
+            'concerns': 'No specific intelligence concerns known',
+            'alternative': None
+        }
+
+
 class ComplianceFramework:
-    """SSH compliance framework definitions"""
+    """SSH compliance framework definitions with NSA backdoor awareness"""
     
     FRAMEWORKS = {
+        'PRIVACY_FOCUSED': {
+            'name': 'Privacy-Focused Anti-Surveillance Framework',
+            'required_ciphers': [
+                'chacha20-poly1305@openssh.com', 'aes256-gcm@openssh.com'
+            ],
+            'forbidden_ciphers': [
+                'des', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'arcfour', 'arcfour128', 'arcfour256',
+                'aes128-cbc', 'aes192-cbc', 'aes256-cbc'
+            ],
+            'required_mac': [
+                'hmac-sha2-256-etm@openssh.com', 'hmac-sha2-512-etm@openssh.com'
+            ],
+            'forbidden_mac': [
+                'hmac-md5', 'hmac-md5-96', 'hmac-sha1', 'hmac-sha1-96', 'umac-64'
+            ],
+            'required_kex': [
+                'curve25519-sha256', 'curve25519-sha256@libssh.org'
+            ],
+            'forbidden_kex': [
+                'diffie-hellman-group1-sha1', 'diffie-hellman-group14-sha1',
+                'diffie-hellman-group-exchange-sha1',
+                # NSA-suspicious algorithms
+                'ecdh-sha2-nistp256', 'ecdh-sha2-nistp384', 'ecdh-sha2-nistp521'
+            ],
+            'required_hostkey': [
+                'ssh-ed25519'
+            ],
+            'forbidden_hostkey': [
+                'ssh-dss', 'ssh-rsa',
+                # NSA-suspicious algorithms  
+                'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521'
+            ],
+            'minimum_score': 95
+        },
+        
         'NIST': {
             'name': 'NIST Cybersecurity Framework',
             'required_ciphers': [
@@ -685,6 +896,9 @@ class SSHEnhancedScanner:
                 result.algorithms = self.scan_all_algorithms(host, port)
                 result.security_score = self.calculate_security_score(result.algorithms)
                 
+                # NSA backdoor analysis
+                result.nsa_backdoor_analysis = self.analyze_nsa_backdoor_risks(result.algorithms)
+                
                 # Check compliance if framework specified
                 if self.compliance_framework:
                     result.compliance_status = ComplianceFramework.check_compliance(
@@ -758,7 +972,7 @@ class SSHEnhancedScanner:
         return results
     
     def calculate_security_score(self, algorithms: Dict[str, List[SSHAlgorithmInfo]]) -> int:
-        """Calculate security score based on supported algorithms"""
+        """Calculate security score based on supported algorithms including NSA backdoor risks"""
         weak_algorithms = {
             'cipher': [
                 'des', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'arcfour', 'arcfour128', 'arcfour256',
@@ -776,20 +990,42 @@ class SSHEnhancedScanner:
             ]
         }
         
+        # NSA-suspicious algorithms (higher penalty)
+        nsa_suspicious = {
+            'kex': ['ecdh-sha2-nistp256', 'ecdh-sha2-nistp384', 'ecdh-sha2-nistp521'],
+            'key': ['ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521']
+        }
+        
         total_supported = 0
         weak_count = 0
+        nsa_risk_count = 0
         
         for algo_type, algo_list in algorithms.items():
             for algo in algo_list:
                 if algo.supported:
                     total_supported += 1
+                    
+                    # Check for traditional weak algorithms
                     if algo.name in weak_algorithms.get(algo_type, []):
                         weak_count += 1
+                    
+                    # Check for NSA-suspicious algorithms (double penalty)
+                    if algo.name in nsa_suspicious.get(algo_type, []):
+                        nsa_risk_count += 1
         
         if total_supported == 0:
             return 0
         
-        return max(0, 100 - (weak_count * 100 // total_supported))
+        # Calculate score with NSA risk penalty
+        weak_penalty = (weak_count * 100 // total_supported)
+        nsa_penalty = (nsa_risk_count * 150 // total_supported)  # 1.5x penalty for NSA risk
+        
+        final_score = max(0, 100 - weak_penalty - nsa_penalty)
+        return final_score
+    
+    def analyze_nsa_backdoor_risks(self, algorithms: Dict[str, List[SSHAlgorithmInfo]]) -> Dict:
+        """Analyze NSA backdoor risks in supported algorithms"""
+        return NSABackdoorDetector.check_nsa_backdoor_risk(algorithms)
     
     def batch_scan(self, hosts: List[Tuple[str, int]], explicit_algorithms: List[str] = None) -> List[SSHHostResult]:
         """Enhanced batch scanning with all features"""
@@ -814,7 +1050,15 @@ class SSHEnhancedScanner:
                             compliance = "✓" if result.compliance_status['overall_compliant'] else "✗"
                             compliance_info = f" - Compliance: {compliance}"
                         
-                        print(f"{status_icon} {host}:{port} - Score: {result.security_score}/100{compliance_info} - {result.scan_time:.1f}s")
+                        print(f"{status_icon} {host}:{port} - Score: {result.security_score}/100{compliance_info}")
+                        
+                        # Show NSA risk warning if enabled
+                        if result.nsa_backdoor_analysis:
+                            high_risk_count = len(result.nsa_backdoor_analysis.get('high_risk_algorithms', []))
+                            if high_risk_count > 0:
+                                print(f"    ⚠️  NSA BACKDOOR RISK: {high_risk_count} high-risk algorithms detected")
+                        
+                        print(f"    Time: {result.scan_time:.1f}s")
                         
                 except Exception as e:
                     with self.lock:
@@ -823,15 +1067,15 @@ class SSHEnhancedScanner:
         return sorted(results, key=lambda x: (x.host, x.port))
     
     def format_results_table(self, results: List[SSHHostResult], show_algorithms: bool = True) -> str:
-        """Enhanced table formatting with compliance info"""
+        """Enhanced table formatting with compliance info and NSA backdoor warnings"""
         if not results:
             return "No results to display"
         
         table_data = []
-        headers = ["Host", "Port", "Status", "Security", "Compliance", "Banner", "Time(s)"]
+        headers = ["Host", "Port", "Status", "Security", "Compliance", "NSA Risk", "Banner", "Time(s)"]
         
         if show_algorithms:
-            headers.append("Supported Algorithms")
+            headers.append("Algorithms")
         
         for result in results:
             supported_algos = []
@@ -846,20 +1090,34 @@ class SSHEnhancedScanner:
             if result.compliance_status and 'overall_compliant' in result.compliance_status:
                 compliance_status = "✓ PASS" if result.compliance_status['overall_compliant'] else "✗ FAIL"
             
+            # NSA backdoor risk status
+            nsa_risk_status = "N/A"
+            if result.nsa_backdoor_analysis:
+                high_risk_count = len(result.nsa_backdoor_analysis.get('high_risk_algorithms', []))
+                if high_risk_count > 0:
+                    nsa_risk_status = f"⚠️  {high_risk_count} HIGH"
+                else:
+                    medium_risk_count = len(result.nsa_backdoor_analysis.get('medium_risk_algorithms', []))
+                    if medium_risk_count > 0:
+                        nsa_risk_status = f"⚠️  {medium_risk_count} MED"
+                    else:
+                        nsa_risk_status = "✓ LOW"
+            
             row = [
                 result.host,
                 str(result.port),
                 result.status,
                 f"{result.security_score}/100",
                 compliance_status,
-                result.ssh_banner[:25] + "..." if len(result.ssh_banner) > 25 else result.ssh_banner,
+                nsa_risk_status,
+                result.ssh_banner[:20] + "..." if len(result.ssh_banner) > 20 else result.ssh_banner,
                 f"{result.scan_time:.1f}"
             ]
             
             if show_algorithms:
-                algo_summary = ", ".join(supported_algos[:3])
-                if len(supported_algos) > 3:
-                    algo_summary += f" (+{len(supported_algos)-3} more)"
+                algo_summary = ", ".join(supported_algos[:2])
+                if len(supported_algos) > 2:
+                    algo_summary += f" (+{len(supported_algos)-2} more)"
                 row.append(algo_summary)
             
             table_data.append(row)
@@ -898,8 +1156,8 @@ class SSHEnhancedScanner:
             output = io.StringIO()
             writer = csv.writer(output)
             
-            writer.writerow(['Host', 'Port', 'Status', 'Security_Score', 'Compliance_Status', 
-                           'SSH_Banner', 'Scan_Time', 'Supported_Algorithms'])
+            writer.writerow(['Host', 'Port', 'Status', 'Security_Score', 'Compliance_Status', 'NSA_Risk_Level',
+                           'NSA_High_Risk_Count', 'SSH_Banner', 'Scan_Time', 'Supported_Algorithms'])
             
             for result in results:
                 supported_algos = []
@@ -913,12 +1171,28 @@ class SSHEnhancedScanner:
                 if result.compliance_status and 'overall_compliant' in result.compliance_status:
                     compliance_status = "PASS" if result.compliance_status['overall_compliant'] else "FAIL"
                 
+                # NSA risk information
+                nsa_risk_level = "UNKNOWN"
+                nsa_high_risk_count = 0
+                if result.nsa_backdoor_analysis:
+                    high_risk_algorithms = result.nsa_backdoor_analysis.get('high_risk_algorithms', [])
+                    nsa_high_risk_count = len(high_risk_algorithms)
+                    
+                    if nsa_high_risk_count > 0:
+                        nsa_risk_level = "HIGH"
+                    elif len(result.nsa_backdoor_analysis.get('medium_risk_algorithms', [])) > 0:
+                        nsa_risk_level = "MEDIUM"
+                    else:
+                        nsa_risk_level = "LOW"
+                
                 writer.writerow([
                     result.host,
                     result.port,
                     result.status,
                     result.security_score,
                     compliance_status,
+                    nsa_risk_level,
+                    nsa_high_risk_count,
                     result.ssh_banner,
                     f"{result.scan_time:.2f}",
                     "; ".join(supported_algos)
@@ -990,6 +1264,7 @@ def main():
     parser.add_argument('--compliance', choices=ComplianceFramework.get_framework_list(), 
                        help='Compliance framework to check against')
     parser.add_argument('--list-frameworks', action='store_true', help='List available compliance frameworks')
+    parser.add_argument('--nsa-analysis', action='store_true', help='Enable detailed NSA backdoor risk analysis')
     
     # Output options
     parser.add_argument('--format', choices=['json', 'csv', 'yaml', 'table'], default='table',
@@ -1129,6 +1404,46 @@ def main():
                                 if r.compliance_status and r.compliance_status.get('overall_compliant', False))
             compliance_rate = (compliant_hosts / successful_scans) * 100
             print(f"Compliance rate ({scanner.compliance_framework}): {compliant_hosts}/{successful_scans} ({compliance_rate:.1f}%)")
+        
+        # NSA backdoor analysis summary
+        if args.nsa_analysis or any(r.nsa_backdoor_analysis for r in results):
+            print(f"\n" + "=" * 80)
+            print("NSA BACKDOOR RISK ANALYSIS")
+            print("=" * 80)
+            
+            total_high_risk = 0
+            total_medium_risk = 0
+            affected_hosts = 0
+            
+            for result in results:
+                if result.nsa_backdoor_analysis:
+                    high_risk_count = len(result.nsa_backdoor_analysis.get('high_risk_algorithms', []))
+                    medium_risk_count = len(result.nsa_backdoor_analysis.get('medium_risk_algorithms', []))
+                    
+                    if high_risk_count > 0 or medium_risk_count > 0:
+                        affected_hosts += 1
+                        total_high_risk += high_risk_count
+                        total_medium_risk += medium_risk_count
+            
+            print(f"Hosts with NSA backdoor risks: {affected_hosts}/{successful_scans}")
+            print(f"High-risk algorithms detected: {total_high_risk}")
+            print(f"Medium-risk algorithms detected: {total_medium_risk}")
+            
+            # Show detailed analysis for first host with high risks
+            for result in results:
+                if (result.nsa_backdoor_analysis and 
+                    result.nsa_backdoor_analysis.get('high_risk_algorithms')):
+                    
+                    print(f"\n⚠️  HIGH RISK ALGORITHMS DETECTED:")
+                    for risk_algo in result.nsa_backdoor_analysis['high_risk_algorithms']:
+                        print(f"  - {risk_algo['algorithm']} ({risk_algo['type']}): {risk_algo['reason']}")
+                        print(f"    Recommended: {risk_algo['recommended_alternative']}")
+                    
+                    if result.nsa_backdoor_analysis.get('recommendations'):
+                        print(f"\n📋 SECURITY RECOMMENDATIONS:")
+                        for i, rec in enumerate(result.nsa_backdoor_analysis['recommendations'][:3], 1):
+                            print(f"  {i}. {rec}")
+                    break
         
         # Performance statistics
         if args.stats:
