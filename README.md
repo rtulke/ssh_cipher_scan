@@ -86,6 +86,23 @@ python3 sshscan.py --config config.toml --file servers.txt
 python3 sshscan.py --config config.toml --threads 50 --timeout 20
 ```
 
+### Load Configuration File
+
+Depending on the user, the configuration file can be read in automatically at various points in the system without specifying an additional parameter (--config | -c)
+
+As user root:
+```bash
+/etc/sshscan/config.toml
+/etc/sshscan.toml
+```
+
+
+As a normal user:
+```bash
+~/.sshscan/config.toml
+~/.sshscan.toml
+```
+
 ## 📊 Compliance Frameworks
 
 ### Available Frameworks
@@ -135,6 +152,41 @@ python3 sshscan.py --host "server1.com,server2.com:2222,192.168.1.10"
 
 # Scan from file
 python3 sshscan.py --file hosts.txt
+```
+
+### Resume Scanning
+
+```bash
+# Resume interrupted scan
+python3 sshscan.py --resume scan_20240115_143022_abc123
+
+# Show saved scans
+python3 sshscan.py --list-scans
+```
+
+example
+```bash
+Scan ID: scan_20240115_150234_def456 (use --resume scan_20240115_150234_def456 to continue if interrupted)
+
+Configuration:
+  Threads: 30
+  Timeout: 15s
+  SSH Multiplexing: enabled
+  DNS Caching: enabled (TTL: 600s)
+  Retry Attempts: 3
+  NSA Analysis: enabled
+  Compliance Framework: NIST (NIST Cybersecurity Framework)
+
+Starting scan of 100 hosts...
+================================================================================
+Scanning hosts: 100%|████████████| 100/100 [02:34<00:00,  1.54s/host]
+
+[Ergebnisse...]
+
+Failure breakdown:
+  connection: 3
+  timeout: 2
+  dns: 1
 ```
 
 ### Performance Tuning
@@ -274,32 +326,37 @@ The scanner evaluates algorithm strength on a 0-100 scale:
 python3 sshscan.py [OPTIONS]
 
 Configuration:
-  --config, -c FILE         TOML configuration file path
+  --config, -c FILE            TOML configuration file path
 
 Host Specification (mutually exclusive):
-  --host, -H HOSTS         Single host or comma-separated list
-  --file, -f FILE          File containing hosts (.json, .yaml, .csv, .txt)
-  --local, -l              Show local SSH client algorithms
+  --host, -H HOSTS             Single host or comma-separated list
+  --file, -f FILE              File containing hosts (.json, .yaml, .csv, .txt)
+  --local, -l                  Show local SSH client algorithms
 
 Scanning Options:
-  --port, -p PORT          Default SSH port (default: 22)
-  --threads, -T COUNT      Number of concurrent threads (default: 20)
-  --timeout, -t SECONDS    Connection timeout (default: 10)
-  --no-multiplex           Disable SSH multiplexing
-  --retry-attempts COUNT   Retry attempts for failed connections (default: 3)
+  --port, -p PORT              Default SSH port (default: 22)
+  --threads, -T COUNT          Number of concurrent threads (default: 20)
+  --timeout, -t SECONDS        Connection timeout (default: 10)
+  --no-multiplex               Disable SSH multiplexing
+  --retry-attempts COUNT       Retry attempts for failed connections (default: 3)
+  --list-scans                 Show saved scans
+  --resume scan_20240115_143   Resume interrupted scan
+  --no-progress                Deactivate progress bar
+
 
 Algorithm Testing:
-  --explicit, -e ALGOS     Comma-separated list of specific algorithms to test
+  --explicit, -e ALGOS         Comma-separated list of specific algorithms to test
 
 Compliance:
-  --compliance FRAMEWORK   Check compliance (NIST, FIPS_140_2, BSI_TR_02102, ANSSI, PRIVACY_FOCUSED)
-  --list-frameworks        List available compliance frameworks
+  --compliance FRAMEWORK       Check compliance (NIST, FIPS_140_2, BSI_TR_02102, ANSSI, PRIVACY_FOCUSED)
+  --list-frameworks            List available compliance frameworks
+  --no-nsa-analysis            Deactivate NSA analysis
 
 Output Options:
-  --format FORMAT          Output format: table, json, csv, yaml (default: table)
-  --output, -o FILE        Output file (default: stdout)
-  --verbose, -v            Verbose output with debug information
-  --stats                  Show performance statistics
+  --format FORMAT              Output format: table, json, csv, yaml (default: table)
+  --output, -o FILE            Output file (default: stdout)
+  --verbose, -v                Verbose output with debug information
+  --stats                      Show performance statistics
 ```
 
 ## 🤝 Contributing
