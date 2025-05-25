@@ -28,7 +28,7 @@ A comprehensive Python tool for SSH security auditing with advanced features inc
 ```bash
 # Install dependencies
 sudo apt update && apt upgrade -y
-sudo apt install python3-toml python3-yaml git -y
+sudo apt install python3-toml python3-yaml python3-tqdm git -y
 
 # Clone Repository
 git clone https://github.com/rtulke/sshscan.git
